@@ -441,14 +441,10 @@ where
     F: Into<HertzU32>,
 {
     let timeout: MicrosDurationU64 = timeout.into();
-    let micros = timeout.to_micros();
-
     let clock: HertzU32 = clock.into();
 
-    // TODO can we get this to not use doubles/floats
-    let period = 1_000_000f64 / (clock.to_Hz() as f64 / divider as f64); // micros
-
-    (micros as f64 / period) as u64
+    // rearrangement of: (clock / divider) * timeout, for best integer precision
+    (clock.to_Hz() as u64 * timeout.to_micros()) / (divider as u64 * 1_000_000)
 }
 
 impl<T> CountDown for Timer<T>
